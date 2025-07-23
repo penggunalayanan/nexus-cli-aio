@@ -176,23 +176,27 @@ function createNodeId(): void {
     $command = $nexusCliPath . " register-node";
     echo colorLog("\n▶️ Menjalankan: ", 'yellow') . $command . "\n";
 
+    // Menggunakan exec untuk menangkap output
     exec($command, $output, $return_var);
-    echo implode("\n", $output) . "\n";
+    $fullOutput = implode("\n", $output);
+    echo $fullOutput . "\n"; // Tampilkan seluruh output untuk debugging
 
     if ($return_var === 0) {
         $foundId = false;
-        foreach ($output as $line) {
-            if (preg_match('/Node registered successfully with ID:\s*([a-zA-Z0-9\-]+)/i', $line, $matches)) {
-                $nodeId = trim($matches[1]);
-                saveConfiguration();
-                echo colorLog("\n✅ Node ID berhasil dibuat dan disimpan: " . $nodeId . "\n", 'green');
-                $foundId = true;
-                break; 
-            }
+        // Regex yang lebih fleksibel untuk menangkap Node ID
+        // Mencari "Node registered successfully with ID: <ID>" atau "Successfully registered node with ID: <ID>"
+        if (preg_match('/(?:Node registered successfully with ID|Successfully registered node with ID):\s*([a-zA-Z0-9\-]+)/i', $fullOutput, $matches)) {
+            $nodeId = trim($matches[1]);
+            saveConfiguration();
+            echo colorLog("\n✅ Node ID berhasil dibuat dan disimpan: " . $nodeId . "\n", 'green');
+            $foundId = true;
         }
-        if (!$foundId) echo colorLog("Tidak dapat menemukan Node ID pada output, mohon periksa kembali.\n", 'red');
+        
+        if (!$foundId) {
+            echo colorLog("Tidak dapat menemukan Node ID pada output, mohon periksa kembali. Output lengkap di atas.\n", 'red');
+        }
     } else {
-        echo colorLog("Gagal membuat Node ID. Pastikan wallet Anda sudah terdaftar.\n", 'red');
+        echo colorLog("Gagal membuat Node ID. Pastikan wallet Anda sudah terdaftar. Kode error: $return_var\n", 'red');
     }
 }
 
@@ -474,6 +478,8 @@ if (trim(readline()) === '1') {
 loadConfiguration();
 
 while (true) {
+    // Perbarui path nexusCliPath setiap kali masuk loop utama
+    // Ini penting jika CLI baru diinstal atau diperbarui
     $nexusCliPath = findExecutable('nexus-network', $userHome);
 
     echo colorLog("\nTekan [Enter] untuk menampilkan menu...", 'cyan');
