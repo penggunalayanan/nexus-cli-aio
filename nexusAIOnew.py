@@ -447,6 +447,21 @@ def reboot_vps():
     else:
         print(color_log("Reboot dibatalkan.\n", 'green'))
 
+def start_node_with_custom_threads():
+    """Menjalankan node dengan jumlah thread yang ditentukan pengguna."""
+    print(color_log("🖥️ Menjalankan Node dengan jumlah thread yang ditentukan...\n", 'cyan'))
+    try:
+        threads = int(get_input("Masukkan jumlah thread yang diinginkan: "))
+        if threads <= 0:
+            print(color_log("Jumlah thread harus lebih besar dari 0.", 'red'))
+            return
+    except ValueError:
+        print(color_log("Input tidak valid. Silakan masukkan angka.", 'red'))
+        return
+    
+    # Memanggil fungsi start_node dengan thread yang ditentukan
+    start_node(background=True, max_threads=threads)
+
 def show_system_utilities_menu():
     """Menampilkan submenu utilitas sistem."""
     while True:
@@ -517,7 +532,8 @@ def main():
         print("4. Create/Update Node ID")
         print("5. Run node (foreground)")
         print("6. " + color_log("Run Node (background)", 'cyan'))
-        print("6b. " + color_log("Run Node with MaxThread (On Screen)", 'yellow'))
+        # Menambahkan opsi baru untuk jumlah thread yang dapat disesuaikan
+        print("6b. " + color_log("Run Node with Custom Threads (On Screen)", 'yellow'))
         print("7. Lihat Sesi Screen (Logs)")
         print("8. " + color_log("Hentikan Sesi Screen", 'red'))
         print("9. " + color_log("Utilitas Sistem", 'yellow'))
@@ -531,7 +547,8 @@ def main():
         elif choice == '4': create_node_id()
         elif choice == '5': start_node()
         elif choice == '6': start_node(background=True)
-        elif choice == '6b': start_node(background=True, max_threads=4)
+        # Menambahkan case untuk opsi baru
+        elif choice == '6b': start_node_with_custom_threads()
         elif choice == '7': view_screen_logs()
         elif choice == '8': stop_screen()
         elif choice == '9': show_system_utilities_menu()
